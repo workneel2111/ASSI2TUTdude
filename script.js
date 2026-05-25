@@ -1,7 +1,6 @@
 // Initialize EmailJS
 (function() {
-    // Replace with your actual EmailJS Public Key
-    emailjs.init("YOUR_PUBLIC_KEY");
+    emailjs.init("ELjpmr9uO7K0mKXoD"); 
 })();
 
 const services = [
@@ -75,16 +74,16 @@ document.getElementById('booking-form').addEventListener('submit', function(e) {
         total_price: document.getElementById('total-price').innerText
     };
 
-    // Note: You must configure a Service and Template in your EmailJS dashboard
-    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', formData)
+    // Double-check these IDs in your EmailJS dashboard: https://dashboard.emailjs.com/
+    emailjs.send('service_kkij86b', 'template_08occso', formData)
         .then(() => {
             document.getElementById('booking-message').style.display = 'block';
             cart = [];
             updateCartUI();
             e.target.reset();
         }, (error) => {
-            console.log('FAILED...', error);
-            alert("Failed to send booking request. Please try again.");
+            console.error('EmailJS Error Object:', error);
+            alert(`Failed to send booking request: ${error.text || 'Unknown Error'}. Please check if the Template ID "template_08occso" is correct in your EmailJS dashboard.`);
         });
 });
 
