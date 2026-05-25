@@ -4,11 +4,11 @@
 })();
 
 const services = [
-    { id: 1, name: "Wash & Fold", price: 15 },
-    { id: 2, name: "Dry Cleaning", price: 25 },
-    { id: 3, name: "Ironing Service", price: 10 },
-    { id: 4, name: "Steam Press", price: 12 },
-    { id: 5, name: "Curtain Cleaning", price: 40 }
+    { id: 1, name: "Wash & Fold", price: 15, icon: "fa-soap" },
+    { id: 2, name: "Dry Cleaning", price: 25, icon: "fa-wind" },
+    { id: 3, name: "Ironing Service", price: 10, icon: "fa-shirt" },
+    { id: 4, name: "Steam Press", price: 12, icon: "fa-hot-tub-person" },
+    { id: 5, name: "Curtain Cleaning", price: 40, icon: "fa-scroll" }
 ];
 
 let cart = [];
@@ -17,7 +17,10 @@ function renderServices() {
     const list = document.getElementById('services-list');
     list.innerHTML = services.map(service => `
         <div class="service-item">
-            <span>${service.name} - $${service.price}</span>
+            <span>
+                <i class="fas ${service.icon}"></i>
+                ${service.name} - $${service.price}
+            </span>
             <div class="service-controls">
                 <button class="add-btn" onclick="addToCart(${service.id})">Add Items</button>
                 <button class="remove-btn" onclick="removeFromCart(${service.id})">Remove Now</button>
@@ -50,9 +53,27 @@ function updateCartUI() {
         return;
     }
 
-    cartContainer.innerHTML = cart.map((item, idx) => `
-        <div class="cart-line">${item.name} - $${item.price}</div>
-    `).join('');
+    let tableHTML = `
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>SR No.</th>
+                    <th>Service Name</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${cart.map((item, idx) => `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${item.name}</td>
+                        <td>$${item.price}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    cartContainer.innerHTML = tableHTML;
 
     const total = cart.reduce((sum, item) => sum + item.price, 0);
     totalEl.innerText = total;
