@@ -1,149 +1,132 @@
-// Initialize EmailJS
 (function() {
-    emailjs.init("ELjpmr9uO7K0mKXoD"); 
+    // Initializing the email service
+    emailjs.init("ELjpmr9uO7K0mKXoD");
 })();
 
-const services = [
-    { id: 1, name: "Wash & Fold", price: 15, icon: "fa-soap" },
-    { id: 2, name: "Dry Cleaning", price: 25, icon: "fa-wind" },
-    { id: 3, name: "Ironing Service", price: 10, icon: "fa-shirt" },
-    { id: 4, name: "Steam Press", price: 12, icon: "fa-hot-tub-person" },
-    { id: 5, name: "Curtain Cleaning", price: 40, icon: "fa-scroll" }
+// Data for our laundry services
+const myServices = [
+    { serviceId: 101, title: "Wash & Fold", cost: 15, iconClass: "fa-soap" },
+    { serviceId: 102, title: "Dry Cleaning", cost: 25, iconClass: "fa-wind" },
+    { serviceId: 103, title: "Ironing", cost: 10, iconClass: "fa-shirt" },
+    { serviceId: 104, title: "Steam Press", cost: 12, iconClass: "fa-hot-tub-person" },
+    { serviceId: 105, title: "Curtain Care", cost: 40, iconClass: "fa-scroll" }
 ];
 
-let cart = [];
+let userSelection = [];
 
-function renderServices() {
-    const list = document.getElementById('services-list');
-    list.innerHTML = services.map(service => `
+// Displaying services on the page
+function displayServices() {
+    const serviceBox = document.getElementById('services-list');
+    let htmlContent = "";
+
+    for (let i = 0; i < myServices.length; i++) {
+        let s = myServices[i];
+        htmlContent += `
         <div class="service-item">
-            <span>
-                <i class="fas ${service.icon}"></i>
-                ${service.name} - $${service.price}
-            </span>
-            <div class="service-controls">
-                <button class="add-btn" onclick="addToCart(${service.id})">Add Items</button>
-                <button class="remove-btn" onclick="removeFromCart(${service.id})">Remove Now</button>
+            <div class="service-info">
+                <i class="fas ${s.iconClass}"></i>
+                <p>${s.title} - $${s.cost}</p>
             </div>
-        </div>
-    `).join('');
-}
-
-function addToCart(id) {
-    const item = services.find(s => s.id === id);
-    cart.push(item);
-    updateCartUI();
-}
-
-function removeFromCart(id) {
-    const index = cart.findLastIndex(s => s.id === id);
-    if (index > -1) {
-        cart.splice(index, 1);
+            <div class="service-controls">
+                <button class="add-btn" onclick="addItem(${s.serviceId})">Add</button>
+                <button class="remove-btn" onclick="removeItem(${s.serviceId})">Remove</button>
+            </div>
+        </div>`;
     }
-    updateCartUI();
+    serviceBox.innerHTML = htmlContent;
 }
 
-function updateCartUI() {
-    const cartContainer = document.getElementById('cart-items');
-    const totalEl = document.getElementById('total-price');
-    
-    if (cart.length === 0) {
-        cartContainer.innerHTML = '<p>No added items.</p>';
-        totalEl.innerText = '0';
+// Adding a service to the selection
+function addItem(id) {
+    for (let i = 0; i < myServices.length; i++) {
+        if (myServices[i].serviceId === id) {
+            userSelection.push(myServices[i]);
+            break;
+        }
+    }
+    refreshCart();
+}
+
+// Removing the last added instance of a service
+function removeItem(id) {
+    let foundIndex = -1;
+    for (let i = 0; i < userSelection.length; i++) {
+        if (userSelection[i].serviceId === id) {
+            foundIndex = i;
+        }
+    }
+
+    if (foundIndex !== -1) {
+        userSelection.splice(foundIndex, 1);
+    }
+    refreshCart();
+}
+
+function refreshCart() {
+    const cartDiv = document.getElementById('cart-items');
+    const totalSpan = document.getElementById('total-price');
+
+    if (userSelection.length === 0) {
+        cartDiv.innerHTML = '<p>Your cart is empty.</p>';
+        totalSpan.innerText = '0';
         return;
     }
 
-    let tableHTML = `
-        <table class="cart-table">
-            <thead>
-                <tr>
-                    <th>SR No.</th>
-                    <th>Service Name</th>
-                    <th>Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${cart.map((item, idx) => `
-                    <tr>
-                        <td>${idx + 1}</td>
-                        <td>${item.name}</td>
-                        <td>$${item.price}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-    cartContainer.innerHTML = tableHTML;
+    let table = '<table class="cart-table"><tr><th>#</th><th>Service</th><th>Price</th></tr>';
+    let grandTotal = 0;
 
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
-    totalEl.innerText = total;
+    for (let j = 0; j < userSelection.length; j++) {
+        table += `<tr>
+            <td>${j + 1}</td>
+            <td>${userSelection[j].title}</td>
+            <td>$${userSelection[j].cost}</td>
+        </tr>`;
+        grandTotal += userSelection[j].cost;
+    }
+    table += '</table>';
+
+    cartDiv.innerHTML = table;
+    totalSpan.innerText = grandTotal;
 }
 
-// Setup Event Listeners after DOM loads
-document.addEventListener('DOMContentLoaded', () => {
-    renderServices();
+window.onload = function() {
+    displayServices();
 
-    // Smooth scroll for hero button
-    const heroBtn = document.getElementById('hero-book-btn');
-    if (heroBtn) {
-        heroBtn.addEventListener('click', () => {
-            document.getElementById('booking-section').scrollIntoView({ behavior: 'smooth' });
-        });
-    }
+    document.getElementById('hero-book-btn').onclick = function() {
+        document.getElementById('booking-section').scrollIntoView({ behavior: 'smooth' });
+    };
 
-    // Event Delegation for Add/Remove buttons in the service list
-    document.getElementById('services-list').addEventListener('click', (e) => {
-        const id = e.target.getAttribute('data-id');
-        if (!id) return;
-
-        if (e.target.classList.contains('add-btn')) {
-            addToCart(id);
-        } else if (e.target.classList.contains('remove-btn')) {
-            removeFromCart(id);
-        }
-    });
-
-    // Form Submission Handling
-    const bookingForm = document.getElementById('booking-form');
-    bookingForm.addEventListener('submit', function(e) {
+    document.getElementById('booking-form').onsubmit = function(e) {
         e.preventDefault();
+
+        if (userSelection.length === 0) {
+            alert("Please pick at least one service!");
+            return;
+        }
+
+        const serviceNames = userSelection.map(item => item.title).join(", ");
         
-        if (cart.length === 0) {
-            alert("Please add at least one service to your selection.");
-            return;
-        }
-
-        // Simple validation check
-        const name = document.getElementById('full-name').value;
-        const email = document.getElementById('email').value;
-        const phone = document.getElementById('phone').value;
-
-        if (name.length < 3) {
-            alert("Please enter a valid name.");
-            return;
-        }
-
-        const formData = {
-            user_name: name,
-            user_email: email,
-            user_phone: phone,
-            services: cart.map(i => i.name).join(', '),
+        const templateParams = {
+            user_name: document.getElementById('full-name').value,
+            user_email: document.getElementById('email').value,
+            user_phone: document.getElementById('phone').value,
+            services: serviceNames,
             total_price: document.getElementById('total-price').innerText
         };
 
-        // Sending the email via EmailJS
-        emailjs.send('service_kkij86b', 'template_08occso', formData)
+        emailjs.send('service_kkij86b', 'template_08occso', templateParams)
             .then(() => {
-                document.getElementById('booking-message').style.display = 'block';
-                cart = [];
-                updateCartUI();
-                bookingForm.reset();
+                const msg = document.getElementById('booking-message');
+                msg.style.display = 'block';
+                userSelection = [];
+                refreshCart();
+                document.getElementById('booking-form').reset();
                 setTimeout(() => {
-                    document.getElementById('booking-message').style.display = 'none';
-                }, 5000);
-            }, (error) => {
-                alert("Submission failed. Check console for details.");
-                console.error('EmailJS Error:', error);
+                    msg.style.display = 'none';
+                }, 4000);
+            }, function(err) {
+                alert("Oops! Something went wrong.");
+                console.log("Error details:", err);
             });
-    });
-});
+    };
+};
