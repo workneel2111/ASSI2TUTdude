@@ -151,8 +151,13 @@ body {
   border-bottom: 1px solid #eee;
 }
 
+.service-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .service-item i {
-  margin-right: 10px;
   color: #007bff;
   width: 20px;
 }
@@ -302,4 +307,28 @@ body {
 
 .social-icons a:hover {
   color: #007bff;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .navbar { padding: 0 20px; }
+  .nav-links { display: none; } /* Hide links on mobile for simplicity */
+  
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding-top: 100px;
+    height: auto;
+  }
+  
+  .booking-container {
+    flex-direction: column;
+  }
+  
+  .newsletter-form {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .newsletter-form input { width: 100%; max-width: 300px; }
 }

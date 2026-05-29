@@ -79,33 +79,71 @@ function updateCartUI() {
     totalEl.innerText = total;
 }
 
-document.getElementById('booking-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    if (cart.length === 0) {
-        alert("Please add at least one service to your cart.");
-        return;
+// Setup Event Listeners after DOM loads
+document.addEventListener('DOMContentLoaded', () => {
+    renderServices();
+
+    // Smooth scroll for hero button
+    const heroBtn = document.getElementById('hero-book-btn');
+    if (heroBtn) {
+        heroBtn.addEventListener('click', () => {
+            document.getElementById('booking-section').scrollIntoView({ behavior: 'smooth' });
+        });
     }
 
-    const formData = {
-        user_name: document.getElementById('full-name').value,
-        user_email: document.getElementById('email').value,
-        user_phone: document.getElementById('phone').value,
-        services: cart.map(i => i.name).join(', '),
-        total_price: document.getElementById('total-price').innerText
-    };
+    // Event Delegation for Add/Remove buttons in the service list
+    document.getElementById('services-list').addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        if (!id) return;
 
-    // Double-check these IDs in your EmailJS dashboard: https://dashboard.emailjs.com/
-    emailjs.send('service_kkij86b', 'template_08occso', formData)
-        .then(() => {
-            document.getElementById('booking-message').style.display = 'block';
-            cart = [];
-            updateCartUI();
-            e.target.reset();
-        }, (error) => {
-            console.error('EmailJS Error Object:', error);
-            alert(`Failed to send booking request: ${error.text || 'Unknown Error'}. Please check if the Template ID "template_08occso" is correct in your EmailJS dashboard.`);
-        });
+        if (e.target.classList.contains('add-btn')) {
+            addToCart(id);
+        } else if (e.target.classList.contains('remove-btn')) {
+            removeFromCart(id);
+        }
+    });
+
+    // Form Submission Handling
+    const bookingForm = document.getElementById('booking-form');
+    bookingForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (cart.length === 0) {
+            alert("Please add at least one service to your selection.");
+            return;
+        }
+
+        // Simple validation check
+        const name = document.getElementById('full-name').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+
+        if (name.length < 3) {
+            alert("Please enter a valid name.");
+            return;
+        }
+
+        const formData = {
+            user_name: name,
+            user_email: email,
+            user_phone: phone,
+            services: cart.map(i => i.name).join(', '),
+            total_price: document.getElementById('total-price').innerText
+        };
+
+        // Sending the email via EmailJS
+        emailjs.send('service_kkij86b', 'template_08occso', formData)
+            .then(() => {
+                document.getElementById('booking-message').style.display = 'block';
+                cart = [];
+                updateCartUI();
+                bookingForm.reset();
+                setTimeout(() => {
+                    document.getElementById('booking-message').style.display = 'none';
+                }, 5000);
+            }, (error) => {
+                alert("Submission failed. Check console for details.");
+                console.error('EmailJS Error:', error);
+            });
+    });
 });
-
-renderServices();
